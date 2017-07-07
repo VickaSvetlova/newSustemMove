@@ -24,6 +24,8 @@ public class MoveFloor : MonoBehaviour
     private Vector3 newSpotPositio;
     private GameObject heigtHiro;
     private string floorIgnore = null;
+    private Vector3 SpotPosition;
+
     #endregion
 
     #region Events
@@ -31,6 +33,24 @@ public class MoveFloor : MonoBehaviour
 
     #region Metods
     private void Update()
+    {
+        controlKeys();
+    }
+
+    private IEnumerator moveToPosition(Vector3 v1,Vector3 v2)
+    {
+        float timer = 0f;
+        float maxTime = 1.5f;
+        while (timer < maxTime)
+        {
+            float coeff = timer / maxTime;
+            Vector3.Lerp(v1, v2, timer);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        // для совсем точности можешь здесь задать финишные координаты напрямую
+    }
+    private void controlKeys()
     {
         if (!_move)
         {
@@ -43,6 +63,10 @@ public class MoveFloor : MonoBehaviour
                 getFloor(_direction.down);
 
             }
+        }
+        else
+        {
+            StartCoroutine(moveToPosition( transform.position,SpotPosition));
         }
     }
     private void getFloor(_direction dir)
@@ -69,30 +93,31 @@ public class MoveFloor : MonoBehaviour
         Debug.Log("floorIgnore " + floorIgnore);
         float HeightHiro = GetComponent<Collider>().transform.localScale.y / 2;
         float HeightFloor = floorObject.GetComponent<Collider>().transform.localScale.y / 2;
-        Vector3 SpotPosition = new Vector3(0, floorObject.transform.position.y + HeightFloor + HeightHiro, 0);
+        SpotPosition = new Vector3(0, floorObject.transform.position.y + HeightFloor + HeightHiro, 0);
         transform.position = SpotPosition;
+        //_move = true;
     }
-private bool rayCaster(Vector3 dir)
-{
-    RaycastHit[] hits;
-    hits = Physics.RaycastAll(transform.position, dir, 100.0f);
-    for (int i = 0; i < hits.Length; i++)
+    private bool rayCaster(Vector3 dir)
     {
-        RaycastHit hit = hits[i];
-        Collider Hit = hit.transform.GetComponent<Collider>();
-        Debug.DrawRay(transform.position, dir, Color.green);
-        if (Hit)
+        RaycastHit[] hits;
+        hits = Physics.RaycastAll(transform.position, dir, 100.0f);
+        for (int i = 0; i < hits.Length; i++)
         {
-            if (hit.collider.tag == "floor" && hit.collider.gameObject.name != floorIgnore)
+            RaycastHit hit = hits[i];
+            Collider Hit = hit.transform.GetComponent<Collider>();
+            Debug.DrawRay(transform.position, dir, Color.green);
+            if (Hit)
             {
-                floorObject = hit.collider.gameObject;
-                return Hit;
+                if (hit.collider.tag == "floor" && hit.collider.gameObject.name != floorIgnore)
+                {
+                    floorObject = hit.transform.gameObject;
+                    return Hit;
+                }
             }
+            floorObject = null;
         }
-        floorObject = null;
+        return false;
     }
-    return false;
-}
     #endregion
 }
 
