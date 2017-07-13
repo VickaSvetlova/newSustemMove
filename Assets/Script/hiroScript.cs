@@ -31,6 +31,7 @@ public class hiroScript : MonoBehaviour
         var mouse = (MouseLook)FindObjectOfType(typeof(MouseLook));
         mouse.EventRotation+=copyRot;
         
+        
     }
     public void copyRot(Quaternion rotations)
     {
