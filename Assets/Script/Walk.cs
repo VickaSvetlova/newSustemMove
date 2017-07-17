@@ -40,7 +40,7 @@ public class Walk : MonoBehaviour
         {
             //_scene.transform.position = new Vector3(_scene.transform.position.x, _scene.transform.position.y, _scene.transform.position.z+Time.deltaTime*5);
             //_scene.transform.Translate(Vector3.forward * Time.deltaTime * 5);
-            _scene.transform.Translate(transform.forward * -Time.deltaTime * 5, Space.World);
+            _scene.transform.Translate(_scene.transform.forward * -Time.deltaTime * 5, Space.World);
         }
         if (Input.GetKey(KeyCode.A))
         {
