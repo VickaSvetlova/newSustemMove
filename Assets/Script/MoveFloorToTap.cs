@@ -6,7 +6,7 @@ using UnityEngine;
 public class MoveFloorToTap : MonoBehaviour
 {
     #region Enum
-    private enum _state { up, down, lookTap,walk }
+    private enum _state { up, down, lookTap, walk }
     private _state direct;
     #endregion
 
@@ -36,6 +36,10 @@ public class MoveFloorToTap : MonoBehaviour
     private string _floorNameThis;
     private RaycastHit hitDown;
     private float hitDowns;
+    public bool moveTo;
+
+    private Collider floorColider;
+    private Collider ignoreColider;
 
 
     #endregion
@@ -49,18 +53,14 @@ public class MoveFloorToTap : MonoBehaviour
         controlKeys();
         controllMove();
     }
-
     private void controllMove()
     {
         if (!_moveCorutine && _move)
-           
         {
             _moveCorutine = true;
             StartCoroutine(moveToPosition(_stage.transform.position, SpotPosition));
-         // GetComponentInChildren<Collider>().enabled=false;
-          GetComponentInChildren<Rigidbody>().isKinematic = true;
-
-
+            // GetComponentInChildren<Collider>().enabled=false;
+            GetComponentInChildren<Rigidbody>().isKinematic = true;
         }
     }
 
@@ -75,8 +75,7 @@ public class MoveFloorToTap : MonoBehaviour
             timer += Time.deltaTime;
             yield return null;
         }
-       // GetComponentInChildren<Collider>().enabled = true;
-
+        // GetComponentInChildren<Collider>().enabled = true;
         GetComponentInChildren<Rigidbody>().isKinematic = false;
         _move = false;
         _moveCorutine = false;
@@ -92,9 +91,8 @@ public class MoveFloorToTap : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
                 getFloor(_state.down);
-
             }
-            if (Input.GetMouseButton(1))
+            if (Input.GetMouseButtonDown(1))
             {
                 getFloor(_state.lookTap);
             }
@@ -102,7 +100,6 @@ public class MoveFloorToTap : MonoBehaviour
             {
                 getFloor(_state.walk);
             }
-
         }
     }
     private void getFloor(_state State)
@@ -115,19 +112,17 @@ public class MoveFloorToTap : MonoBehaviour
                 {
                     rayCaster(new Vector3(hitTo.x, hitTo.y + hitDowns, hitTo.z), Vector3.down);
                     CalculateMove(hitTo);
-
                 }
-              
                 break;
             case _state.up:
-                if (rayCaster(transform.position,Vector3.up))
+                if (rayCaster(transform.position, Vector3.up))
                 {
                     rayCaster(new Vector3(hitTo.x, hitTo.y + hitDowns, hitTo.z), Vector3.down);
                     CalculateMove(hitTo);
                 }
                 break;
             case _state.down:
-                if (rayCaster(transform.position,Vector3.down))
+                if (rayCaster(transform.position, Vector3.down))
                 {
                     rayCaster(new Vector3(hitTo.x, hitTo.y + hitDowns, hitTo.z), Vector3.down);
                     CalculateMove(hitTo);
@@ -136,26 +131,23 @@ public class MoveFloorToTap : MonoBehaviour
             case _state.walk:
                 _stage.transform.Translate(_stage.transform.forward * -Time.deltaTime * 5, Space.World);
                 break;
-
         }
     }
     private void CalculateMove(Vector3 hitToPos)
     {
-        floorIgnore = floorObject.name;
+        ignoreColider = floorColider;
         float heghtHiro = GetComponentInChildren<Collider>().bounds.size.y / 2;
         SpotPosition = _stage.transform.position + new Vector3(transform.position.x, transform.position.y - heghtHiro, transform.position.z) - hitToPos;
         instatientPatchSpot(SpotPosition);
-
-        _move = true;
-
-
+        if (moveTo)
+        {
+            _move = true;
+        }
     }
     private void instatientPatchSpot(Vector3 posSpot)
     {
         spotPatch.transform.localPosition = _stage.transform.InverseTransformPoint(hitTo);
-        // spotPatch.transform.LookAt(new Vector3(transform.position.x, spotPatch.transform.position.y, transform.position.z));
     }
-
     private bool rayCaster(Vector3 positionRay, Vector3 dir)
     {
         RaycastHit[] hits;
@@ -167,13 +159,17 @@ public class MoveFloorToTap : MonoBehaviour
             Debug.DrawRay(positionRay, dir, Color.red);
             if (Hit)
             {
-                if (hit.collider.tag == _floorNameTag && hit.collider.gameObject.name != floorIgnore)
+                if (hit.collider.tag == _floorNameTag && hit.collider!= ignoreColider)
                 {
                     hitDowns = hit.collider.gameObject.GetComponent<Renderer>().bounds.size.y + 0.1f;
-                    floorObject = hit.transform.gameObject;
+                    floorColider = hit.collider;
                     hitTo = hit.point;
                     return Hit;
-                    //_floorNameThis = hit.transform.gameObject.name;
+                }
+                else
+                {
+                    floorColider = hit.collider;
+                    hitTo = hit.point;
                 }
             }
             floorObject = null;
