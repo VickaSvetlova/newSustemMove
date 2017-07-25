@@ -48,6 +48,12 @@ public class MoveFloorToTap : MonoBehaviour
     #endregion
 
     #region Metods
+    private void Awake()
+    {
+        _stage = GameObject.FindGameObjectWithTag("stage");
+
+        
+    }
     private void Update()
     {
         controlKeys();
@@ -163,12 +169,14 @@ public class MoveFloorToTap : MonoBehaviour
                 {
                     hitDowns = hit.collider.gameObject.GetComponent<Renderer>().bounds.size.y + 0.1f;
                     floorColider = hit.collider;
+                    ignoreColider = null;
                     hitTo = hit.point;
                     return Hit;
                 }
                 else
                 {
-                    floorColider = hit.collider;
+                    //floorColider = hit.collider;
+                   
                     hitTo = hit.point;
                 }
             }
